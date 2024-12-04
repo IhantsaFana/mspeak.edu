@@ -1,0 +1,225 @@
+<header class="header">
+    <?php require APPROOT . '/views/inc/header.php'; ?>
+    <main>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-sm mb-5 mx-auto">
+                    <h1 class="fs-4 text-center lead text-primary">Application de facturation</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="dropdown-divider border-warning"></div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h1>Listes des Factures</h1>
+                    </div>
+                    <div class="col-md-6 d-flex justify-content-end">
+                        <div style="margin: auto;">
+                            <button class="btn btn-primary btn-sm me-3" type="button" data-bs-toggle="modal" data-bs-target="#addModal">
+                                <i class="fas fa-folder-plus"></i>&nbsp;Nouveau
+                            </button>
+                            <button class="btn btn-success btn-sm" id="export" type="button">
+                                <i class="fas fa-table"></i>&nbsp;Exporter
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown-divider border-warning"></div>
+            </div>
+            <div class="row">
+                <div class="table-responsive" id="orderTable">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Clients</th>
+                                <th scope="col">Caissier</th>
+                                <th scope="col">Montant</th>
+                                <th scope="col">Perçu</th>
+                                <th scope="col">Retourné</th>
+                                <th scope="col">État</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($data['factures'] as $facture) { ?>
+                                <tr>
+                                    <td scope="row"><?= $facture->id ?></td>
+                                    <td scope="row"><?= $facture->client ?></td>
+                                    <td scope="row"><?= $facture->caissier ?></td>
+                                    <td scope="row"><?= $facture->montant ?></td>
+                                    <td scope="row"><?= $facture->percu ?></td>
+                                    <td scope="row"><?= $facture->retourne ?></td>
+                                    <td scope="row"><?= $facture->etat ?></td>
+                                    <td scope="row">
+                                        <a class="text-info me-2 infoBtn" href="#" title="Voir détails" data-bs-toggle="modal" data-bs-target="#detailModal<?= $facture->id ?>"><i class="fas fa-info-circle"></i></a>
+                                        <a class="text-primary me-2 editBtn" href="#" title="Modifier" data-bs-toggle="modal" data-bs-target="#editModal<?= $facture->id ?>"><i class="far fa-edit"></i></a>
+                                        <a class="text-danger me-2 deleteBtn" href="#" title="Supprimer" data-bs-toggle="modal" data-bs-target="#deleteModal<?= $facture->id ?>"><i class="far fa-trash-alt"></i></a>
+                                    </td>
+                                </tr>
+
+                                <!-- Modal Ajouter -->
+                                <div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="addModalLabel">Ajouter une nouvelle facture</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            
+                                            <form action="<?= URLROOT ?>/facture/index" method="post" id="formOrder">
+                                                <div class="modal-body">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control" id="customer" name="customer" required>
+                                                        <label for="customer">Nom du client</label>
+                                                    </div>
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control" id="cashier" name="cashier" required>
+                                                        <label for="cashier">Nom du caissier</label>
+                                                    </div>
+                                                    <div class="row g-2">
+                                                        <div class="col-md">
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" class="form-control" id="amount" name="amount" required>
+                                                                <label for="amount">Montant</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md">
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" class="form-control" id="receive" name="receive" required>
+                                                                <label for="receive">Montant perçu</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md">
+                                                            <div class="form-floating">
+                                                                <select class="form-select" id="state" aria-label="state" name="state" required>
+                                                                    <option value="Facturée">Facturée</option>
+                                                                    <option value="Payée">Payée</option>
+                                                                    <option value="Annulée">Annulée</option>
+                                                                </select>
+                                                                <label for="state">État</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                    <input type="submit" class="btn btn-primary" id="create" value="Ajouter">
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+
+
+
+                                <!-- Modal Détail -->
+                                <div class="modal fade" id="detailModal<?= $facture->id ?>" tabindex="-1" aria-labelledby="detailModalLabel<?= $facture->id ?>" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="detailModalLabel<?= $facture->id ?>">Détails de la facture #<?= $facture->id ?></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><strong>Client :</strong> <?= $facture->client ?></p>
+                                                <p><strong>Caissier :</strong> <?= $facture->caissier ?></p>
+                                                <p><strong>Montant :</strong> <?= $facture->montant ?></p>
+                                                <p><strong>Perçu :</strong> <?= $facture->percu ?></p>
+                                                <p><strong>Retourné :</strong> <?= $facture->retourne ?></p>
+                                                <p><strong>État :</strong> <?= $facture->etat ?></p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Modifier -->
+                                <div class="modal fade" id="editModal<?= $facture->id ?>" tabindex="-1" aria-labelledby="editModalLabel<?= $facture->id ?>" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="editModalLabel<?= $facture->id ?>">Modifier la facture #<?= $facture->id ?></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form action="<?= URLROOT ?>/facture/update/<?= $facture->id ?>" method="post">
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control" id="client" name="client" value="<?= $facture->client ?>" required>
+                                                        <label for="client">Nom du client</label>
+                                                    </div>
+                                                    <div class="form-floating mb-3">
+                                                        <input type="text" class="form-control" id="caissier" name="caissier" value="<?= $facture->caissier ?>" required>
+                                                        <label for="caissier">Nom du caissier</label>
+                                                    </div>
+                                                    <div class="row g-2">
+                                                        <div class="col-md">
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" class="form-control" id="montant" name="montant" value="<?= $facture->montant ?>" required>
+                                                                <label for="montant">Montant</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md">
+                                                            <div class="form-floating mb-3">
+                                                                <input type="text" class="form-control" id="percu" name="percu" value="<?= $facture->percu ?>" required>
+                                                                <label for="percu">Montant perçu</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md">
+                                                            <div class="form-floating">
+                                                                <select class="form-select" id="state" aria-label="state" name="state">
+                                                                    <option value="Facturée" <?= $facture->etat == 'Facturée' ? 'selected' : '' ?>>Facturée</option>
+                                                                    <option value="Payée" <?= $facture->etat == 'Payée' ? 'selected' : '' ?>>Payée</option>
+                                                                    <option value="Annulée" <?= $facture->etat == 'Annulée' ? 'selected' : '' ?>>Annulée</option>
+                                                                </select>
+                                                                <label for="state">État</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                        <input type="submit" class="btn btn-primary" value="Modifier">
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Modal Supprimer -->
+                                <div class="modal fade" id="deleteModal<?= $facture->id ?>" tabindex="-1" aria-labelledby="deleteModalLabel<?= $facture->id ?>" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteModalLabel<?= $facture->id ?>">Supprimer la facture #<?= $facture->id ?></h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Es-tu sûr de vouloir supprimer cette facture ?</p>
+                                                <p><strong>Client :</strong> <?= $facture->client ?></p>
+                                                <p><strong>Montant :</strong> <?= $facture->montant ?></p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <form method="POST" action="<?= URLROOT ?>/facture/delete/<?= $facture->id ?>">
+                                                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            <?php } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</header>
+
+<?php require APPROOT . '/views/inc/footer.php'; ?>
